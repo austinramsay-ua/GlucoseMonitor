@@ -17,7 +17,6 @@ class GlucoseViewModel : ViewModel() {
     var breakfastColor: Int = defaultColor
     var lunchColor: Int = defaultColor
     var dinnerColor: Int = defaultColor
-    val dateFormatterMDY = DateTimeFormatter.ofPattern("MMM dd, YYYY")
     val dateFormatterFull = DateTimeFormatter.ofPattern("MMM dd, YYYY HH:mm:ss")
 
     // Update the view model's glucose object
