@@ -1,0 +1,15 @@
+<resources>
+    <string name="app_name">GlucoseMonitor</string>
+    <string name="fasting_prompt">Fasting:</string>
+    <string name="breakfast_prompt">Breakfast:</string>
+    <string name="lunch_prompt">Lunch:</string>
+    <string name="dinner_prompt">Dinner:</string>
+    <string name="number_hint">Number</string>
+    <string name="clear_button_text">Clear</string>
+    <string name="history_button_text">History</string>
+    <string name="date_overview_label">DATE HERE</string>
+    <string name="fasting_label">Fasting:</string>
+    <string name="breakfast_label">Breakfast:</string>
+    <string name="lunch_label">Lunch:</string>
+    <string name="dinner_label">Dinner:</string>
+</resources>
