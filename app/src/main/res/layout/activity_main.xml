@@ -133,8 +133,8 @@
 
     <androidx.fragment.app.FragmentContainerView
         android:id="@+id/fragment_container"
-        android:name="edu.arizona.cast.austinramsay.glucosemonitor.InputOverviewFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
 </LinearLayout>
+    <!-- android:name="edu.arizona.cast.austinramsay.glucosemonitor.HistoryFragment" -->

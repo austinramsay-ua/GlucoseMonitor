@@ -11,6 +11,8 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
 import androidx.activity.viewModels
+import androidx.fragment.app.add
+import androidx.fragment.app.commit
 import androidx.lifecycle.Observer
 import kotlinx.coroutines.delay
 import java.lang.NumberFormatException
@@ -45,14 +47,15 @@ class MainActivity : AppCompatActivity() {
 
         // Set the input overview fragment up
         val currentFragment = supportFragmentManager.findFragmentById(R.id.fragment_container)
-        val fragment = InputOverviewFragment()
+
+        // TODO: Switch fragment, history fragment testing
+        // Set the main activity initial fragment
         if (currentFragment == null) {
-            supportFragmentManager
-                .beginTransaction()
-                .add(R.id.fragment_container, fragment)
-                .commit()
+            supportFragmentManager.commit {
+                setReorderingAllowed(true)
+                .add<HistoryFragment>(R.id.fragment_container)
+            }
         }
-        supportFragmentManager.beginTransaction().remove(fragment).commitNow()
 
         // Create a text watcher to apply to all EditText inputs for glucose values
         // Upon values being changed, update the glucose object IF all values are filled

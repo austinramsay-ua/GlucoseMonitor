@@ -12,7 +12,7 @@ import androidx.lifecycle.Observer
 
 private const val TAG = "InputOverviewFragment"
 
-class InputOverviewFragment : Fragment() {
+class InputOverviewFragment : Fragment(R.layout.input_overview_fragment) {
 
     private lateinit var dateOutput: TextView
     private lateinit var fastingOutput: TextView

@@ -12,6 +12,7 @@ private const val TAG = "GlucoseViewModel"
 class GlucoseViewModel : ViewModel() {
 
     var glucose = MutableLiveData<Glucose>()
+    var glucoseHistory: List<Glucose> = listOf()
     val defaultColor = Color.GRAY
     var fastingColor: Int = defaultColor
     var breakfastColor: Int = defaultColor
@@ -59,5 +60,32 @@ class GlucoseViewModel : ViewModel() {
 
         // Update the main glucose object to the new updated object (causes observers to see event)
         this.glucose.value = newGlucose
+    }
+
+    // TODO: Remove this function after testing
+    fun setRandomGlucose() {
+
+        val today: LocalDateTime = LocalDateTime.now()
+
+        // Begin creating objects at the 100th day prior to today
+        val begin: LocalDateTime = today.minusDays(100)
+
+        // Create a mutable list to hold our glucose objects
+        val glucoseList = mutableListOf<Glucose>()
+
+        // Create 100 random glucose objects offsetting the beginning date by the loop index
+        for (offset in 0..99) {
+            val randomGlucose = Glucose(
+                date = begin.plusDays(offset.toLong()),
+                fasting = Glucose.getRandomGlucoseLevel(),
+                breakfast = Glucose.getRandomGlucoseLevel(),
+                lunch = Glucose.getRandomGlucoseLevel(),
+                dinner = Glucose.getRandomGlucoseLevel()
+            )
+
+            glucoseList.add(randomGlucose)
+        }
+
+        glucoseHistory = glucoseList
     }
 }
