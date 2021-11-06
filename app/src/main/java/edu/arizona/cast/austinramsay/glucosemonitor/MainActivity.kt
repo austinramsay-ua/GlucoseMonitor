@@ -130,6 +130,7 @@ class MainActivity : AppCompatActivity() {
         dinnerInput.setTextColor(glucoseViewModel.dinnerColor)
 
         // Update the date button to the glucose date too
-        dateButton.text = glucoseViewModel.glucose.value?.date?.format(glucoseViewModel.dateFormatterFull)
+        //dateButton.text = glucoseViewModel.glucose.value?.date?.format(glucoseViewModel.dateFormatterFull)
+        dateButton.text = glucoseViewModel.glucose.value?.date?.toString()
     }
 }

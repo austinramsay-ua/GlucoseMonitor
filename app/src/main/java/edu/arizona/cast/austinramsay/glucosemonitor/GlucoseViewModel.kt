@@ -3,14 +3,16 @@ package edu.arizona.cast.austinramsay.glucosemonitor
 import android.graphics.Color
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import java.util.*
 
 private const val TAG = "GlucoseViewModel"
 
 class GlucoseViewModel : ViewModel() {
 
+    private val glucoseRepository = GlucoseRepository.get()
+    val glucoseList = glucoseRepository.getGlucoseList()
     var glucose = MutableLiveData<Glucose>()
     var glucoseHistory: List<Glucose> = listOf()
     val defaultColor = Color.GRAY
@@ -22,7 +24,10 @@ class GlucoseViewModel : ViewModel() {
 
     // Update the view model's glucose object
     // If the object already has a date, use it, otherwise stamp it now
-    fun updateGlucose(date: LocalDateTime = glucose.value?.date ?: LocalDateTime.now(),
+    fun updateGlucose(date: Date = glucose.value?.date ?: GregorianCalendar(
+        Calendar.getInstance().get(Calendar.YEAR),
+        Calendar.getInstance().get(Calendar.MONTH),
+        Calendar.getInstance().get(Calendar.DAY_OF_MONTH)).time,
                       fasting: Int,
                       breakfast: Int,
                       lunch: Int,
@@ -63,7 +68,7 @@ class GlucoseViewModel : ViewModel() {
     }
 
     // TODO: Remove this function after testing
-    fun setRandomGlucose() {
+    /*fun setRandomGlucose() {
 
         val today: LocalDateTime = LocalDateTime.now()
 
@@ -88,4 +93,6 @@ class GlucoseViewModel : ViewModel() {
 
         glucoseHistory = glucoseList
     }
+
+     */
 }

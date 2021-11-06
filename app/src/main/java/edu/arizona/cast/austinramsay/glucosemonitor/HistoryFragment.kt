@@ -1,6 +1,7 @@
 package edu.arizona.cast.austinramsay.glucosemonitor
 
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -12,12 +13,18 @@ import androidx.fragment.app.activityViewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 
+private const val TAG = "HistoryFragment"
+
 class HistoryFragment : Fragment(R.layout.history_view) {
 
     private val glucoseViewModel: GlucoseViewModel by activityViewModels()
     private lateinit var rView: RecyclerView
-    private lateinit var rViewAdapter: RecyclerView.Adapter<*>
+
+    // TODO: commented this out adapting to Room
+    // private lateinit var rViewAdapter: RecyclerView.Adapter<*>
+
     private lateinit var rViewManager: RecyclerView.LayoutManager
+    private var rViewAdapter: GlucoseRViewAdapter? = GlucoseRViewAdapter(emptyList())
 
     /*
      * RecyclerView Adapter and Holder classes
@@ -74,8 +81,9 @@ class HistoryFragment : Fragment(R.layout.history_view) {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = layoutInflater.inflate(R.layout.history_view, container, false)
 
-        // TODO: For hardcoded testing purposes only
-        glucoseViewModel.setRandomGlucose()
+        // TODO: For hardcoded testing purposes only - not used after Room implementation, we list the glucose values from the DB
+        // glucoseViewModel.setRandomGlucose()
+
         val data = glucoseViewModel.glucoseHistory
 
         rViewManager = LinearLayoutManager(context)
@@ -89,4 +97,24 @@ class HistoryFragment : Fragment(R.layout.history_view) {
 
         return view
     }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        glucoseViewModel.glucoseList.observe(
+            viewLifecycleOwner,
+            { glucoseList ->
+                glucoseList?.let {
+                    Log.i(TAG, "Got glucose list of size: ${glucoseList.size}")
+                    updateUI(glucoseList)
+                }
+            }
+        )
+    }
+
+    private fun updateUI(glucoseList: List<Glucose>) {
+        rViewAdapter = GlucoseRViewAdapter(glucoseList)
+        rView.adapter = rViewAdapter
+    }
+
 }

@@ -56,7 +56,8 @@ class InputOverviewFragment : Fragment(R.layout.input_overview_fragment) {
     private fun sync() {
         dateOutput.text = when (glucoseViewModel.glucose.value) {
             null -> "No Glucose Input"
-            else -> glucoseViewModel.glucose.value?.date?.format(glucoseViewModel.dateFormatterFull)
+            // else -> glucoseViewModel.glucose.value?.date?.format(glucoseViewModel.dateFormatterFull)
+            else -> glucoseViewModel.glucose.value?.date?.toString()
         }
 
         fastingOutput.text = when (glucoseViewModel.glucose.value) {

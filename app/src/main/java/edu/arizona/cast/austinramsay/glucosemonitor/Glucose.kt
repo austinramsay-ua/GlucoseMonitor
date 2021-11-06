@@ -1,21 +1,24 @@
 package edu.arizona.cast.austinramsay.glucosemonitor
 
-import java.time.LocalDateTime
+import androidx.room.Entity
+import androidx.room.PrimaryKey
 import java.util.*
 
-data class Glucose(val id: UUID = UUID.randomUUID(),
-                   val date: LocalDateTime,
-                   val fasting: Int,
-                   val breakfast: Int,
-                   val lunch: Int,
-                   val dinner: Int) {
+@Entity
+data class Glucose(@PrimaryKey var date: Date = GregorianCalendar(Calendar.getInstance().get(Calendar.YEAR),
+    Calendar.getInstance().get(Calendar.MONTH),
+    Calendar.getInstance().get(Calendar.DAY_OF_MONTH)).time,
+                   var fasting: Int = -1,
+                   var breakfast: Int = -1,
+                   var lunch: Int = -1,
+                   var dinner: Int = -1) {
 
-    val fastingStatus: String?
-    val breakfastStatus: String?
-    val lunchStatus: String?
-    val dinnerStatus: String?
-    val average: Int?
-    val overallStatus: String?
+    var fastingStatus: String?
+    var breakfastStatus: String?
+    var lunchStatus: String?
+    var dinnerStatus: String?
+    var average: Int?
+    var overallStatus: String?
 
     companion object {
         const val STATUS_NORMAL = "Normal"
@@ -64,9 +67,10 @@ data class Glucose(val id: UUID = UUID.randomUUID(),
 
         // Set the overall average values
         average = ((fasting + breakfast + lunch + dinner) / 4)
+
         overallStatus = when {
-            (average < 70) -> STATUS_HYPOGLYCEMIC
-            (average > 140) -> STATUS_ABNORMAL
+            (average!! < 70) -> STATUS_HYPOGLYCEMIC
+            (average!! > 140) -> STATUS_ABNORMAL
             else -> STATUS_NORMAL
         }
     }
