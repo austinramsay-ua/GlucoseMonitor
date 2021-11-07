@@ -109,7 +109,6 @@ class HistoryFragment : Fragment(R.layout.history_view) {
                 glucoseList?.let {
                     Log.i(TAG, "Got glucose list of size: ${glucoseList.size}")
                     updateUI(glucoseList)
-                    Log.i(TAG, glucoseList.toString())
                 }
             }
         )
