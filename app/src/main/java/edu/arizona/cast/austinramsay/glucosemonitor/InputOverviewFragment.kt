@@ -56,28 +56,27 @@ class InputOverviewFragment : Fragment(R.layout.input_overview_fragment) {
     private fun sync() {
         dateOutput.text = when (glucoseViewModel.glucose.value) {
             null -> "No Glucose Input"
-            // else -> glucoseViewModel.glucose.value?.date?.format(glucoseViewModel.dateFormatterFull)
             else -> glucoseViewModel.glucose.value?.date?.toString()
         }
 
         fastingOutput.text = when (glucoseViewModel.glucose.value) {
-            null -> Glucose.STATUS_NONE
-            else -> glucoseViewModel.glucose.value?.fastingStatus
+            null -> GlucoseCalculator.STATUS_NONE
+            else -> GlucoseCalculator.getFastingStatus(glucoseViewModel.glucose.value?.fasting)
         }
 
         breakfastOutput.text = when (glucoseViewModel.glucose.value) {
-            null -> Glucose.STATUS_NONE
-            else -> glucoseViewModel.glucose.value?.breakfastStatus
+            null -> GlucoseCalculator.STATUS_NONE
+            else -> GlucoseCalculator.getBreakfastStatus(glucoseViewModel.glucose.value?.breakfast)
         }
 
         lunchOutput.text = when (glucoseViewModel.glucose.value) {
-            null -> Glucose.STATUS_NONE
-            else -> glucoseViewModel.glucose.value?.lunchStatus
+            null -> GlucoseCalculator.STATUS_NONE
+            else -> GlucoseCalculator.getLunchStatus(glucoseViewModel.glucose.value?.lunch)
         }
 
         dinnerOutput.text = when (glucoseViewModel.glucose.value) {
-            null -> Glucose.STATUS_NONE
-            else -> glucoseViewModel.glucose.value?.dinnerStatus
+            null -> GlucoseCalculator.STATUS_NONE
+            else -> GlucoseCalculator.getDinnerStatus(glucoseViewModel.glucose.value?.dinner)
         }
 
         // Update the colors to the glucose values

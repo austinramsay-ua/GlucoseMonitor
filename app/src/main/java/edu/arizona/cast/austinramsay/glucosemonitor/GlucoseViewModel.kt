@@ -11,16 +11,18 @@ private const val TAG = "GlucoseViewModel"
 
 class GlucoseViewModel : ViewModel() {
 
+    // Data values
     private val glucoseRepository = GlucoseRepository.get()
     val glucoseList = glucoseRepository.getGlucoseList()
     var glucose = MutableLiveData<Glucose>()
-    var glucoseHistory: List<Glucose> = listOf()
+
+    // UI values
     val defaultColor = Color.GRAY
     var fastingColor: Int = defaultColor
     var breakfastColor: Int = defaultColor
     var lunchColor: Int = defaultColor
     var dinnerColor: Int = defaultColor
-    val dateFormatterFull = DateTimeFormatter.ofPattern("MMM dd, YYYY HH:mm:ss")
+    val dateFormatterFull = DateTimeFormatter.ofPattern("MMM dd, yyyy HH:mm:ss")
 
     // Update the view model's glucose object
     // If the object already has a date, use it, otherwise stamp it now
@@ -42,57 +44,28 @@ class GlucoseViewModel : ViewModel() {
             dinner = dinner)
 
         // Update the UI input and output field colors to match the calculated glucose value status (normal, abnormal, etc)
-        fastingColor = when(newGlucose.fastingStatus) {
-            Glucose.STATUS_NORMAL -> Color.rgb(0, 140, 0)
-            Glucose.STATUS_NONE -> defaultColor
+        fastingColor = when(GlucoseCalculator.getFastingStatus(newGlucose.fasting )) {
+            GlucoseCalculator.STATUS_NORMAL -> Color.rgb(0, 140, 0)
+            GlucoseCalculator.STATUS_NONE -> defaultColor
             else -> Color.rgb(170, 0, 0)
         }
-        breakfastColor = when(newGlucose.breakfastStatus) {
-            Glucose.STATUS_NORMAL -> Color.rgb(0, 140, 0)
-            Glucose.STATUS_NONE -> defaultColor
+        breakfastColor = when(GlucoseCalculator.getBreakfastStatus(newGlucose.breakfast)) {
+            GlucoseCalculator.STATUS_NORMAL -> Color.rgb(0, 140, 0)
+            GlucoseCalculator.STATUS_NONE -> defaultColor
             else -> Color.rgb(170, 0, 0)
         }
-        lunchColor = when(newGlucose.lunchStatus) {
-            Glucose.STATUS_NORMAL -> Color.rgb(0, 140, 0)
-            Glucose.STATUS_NONE -> defaultColor
+        lunchColor = when(GlucoseCalculator.getLunchStatus(newGlucose.lunch)) {
+            GlucoseCalculator.STATUS_NORMAL -> Color.rgb(0, 140, 0)
+            GlucoseCalculator.STATUS_NONE -> defaultColor
             else -> Color.rgb(170, 0, 0)
         }
-        dinnerColor = when(newGlucose.dinnerStatus) {
-            Glucose.STATUS_NORMAL -> Color.rgb(0, 140, 0)
-            Glucose.STATUS_NONE -> defaultColor
+        dinnerColor = when(GlucoseCalculator.getDinnerStatus(newGlucose.dinner)) {
+            GlucoseCalculator.STATUS_NORMAL -> Color.rgb(0, 140, 0)
+            GlucoseCalculator.STATUS_NONE -> defaultColor
             else -> Color.rgb(170, 0, 0)
         }
 
         // Update the main glucose object to the new updated object (causes observers to see event)
         this.glucose.value = newGlucose
     }
-
-    // TODO: Remove this function after testing
-    /*fun setRandomGlucose() {
-
-        val today: LocalDateTime = LocalDateTime.now()
-
-        // Begin creating objects at the 100th day prior to today
-        val begin: LocalDateTime = today.minusDays(100)
-
-        // Create a mutable list to hold our glucose objects
-        val glucoseList = mutableListOf<Glucose>()
-
-        // Create 100 random glucose objects offsetting the beginning date by the loop index
-        for (offset in 0..99) {
-            val randomGlucose = Glucose(
-                date = begin.plusDays(offset.toLong()),
-                fasting = Glucose.getRandomGlucoseLevel(),
-                breakfast = Glucose.getRandomGlucoseLevel(),
-                lunch = Glucose.getRandomGlucoseLevel(),
-                dinner = Glucose.getRandomGlucoseLevel()
-            )
-
-            glucoseList.add(randomGlucose)
-        }
-
-        glucoseHistory = glucoseList
-    }
-
-     */
 }

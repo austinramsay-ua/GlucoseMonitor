@@ -39,19 +39,27 @@ class HistoryFragment : Fragment(R.layout.history_view) {
         fun bind(glucose: Glucose) {
             this.glucose = glucose
             dateView.text = this.glucose.date.toString()
-            avgView.text = this.glucose.average.toString()
-            statusCheck.isChecked = if (this.glucose.fastingStatus != Glucose.STATUS_NORMAL) {
-                true
-            } else if (this.glucose.breakfastStatus != Glucose.STATUS_NORMAL) {
-                true
-            } else if (this.glucose.lunchStatus != Glucose.STATUS_NORMAL) {
-                true
-            } else if (this.glucose.dinnerStatus != Glucose.STATUS_NORMAL) {
-                true
-            } else {
-                false
+
+            avgView.text = GlucoseCalculator.getAverage(
+                this.glucose.fasting,
+                this.glucose.breakfast,
+                this.glucose.lunch,
+                this.glucose.dinner
+            ).toString()
+
+            avgStatus.text = GlucoseCalculator.getAverageStatus(
+                this.glucose.fasting,
+                this.glucose.breakfast,
+                this.glucose.lunch,
+                this.glucose.dinner)
+
+            statusCheck.isChecked = when {
+                GlucoseCalculator.getFastingStatus(this.glucose.fasting) != GlucoseCalculator.STATUS_NORMAL -> true
+                GlucoseCalculator.getBreakfastStatus(this.glucose.breakfast) != GlucoseCalculator.STATUS_NORMAL -> true
+                GlucoseCalculator.getLunchStatus(this.glucose.lunch) != GlucoseCalculator.STATUS_NORMAL -> true
+                GlucoseCalculator.getDinnerStatus(this.glucose.dinner) != GlucoseCalculator.STATUS_NORMAL -> true
+                else -> false
             }
-            avgStatus.text = this.glucose.overallStatus
         }
     }
 
@@ -81,13 +89,7 @@ class HistoryFragment : Fragment(R.layout.history_view) {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = layoutInflater.inflate(R.layout.history_view, container, false)
 
-        // TODO: For hardcoded testing purposes only - not used after Room implementation, we list the glucose values from the DB
-        // glucoseViewModel.setRandomGlucose()
-
-        val data = glucoseViewModel.glucoseHistory
-
         rViewManager = LinearLayoutManager(context)
-        rViewAdapter = GlucoseRViewAdapter(data)
 
         rView = view.findViewById<RecyclerView>(R.id.history_recycler_view).apply {
             setHasFixedSize(true)
@@ -107,6 +109,7 @@ class HistoryFragment : Fragment(R.layout.history_view) {
                 glucoseList?.let {
                     Log.i(TAG, "Got glucose list of size: ${glucoseList.size}")
                     updateUI(glucoseList)
+                    Log.i(TAG, glucoseList.toString())
                 }
             }
         )
