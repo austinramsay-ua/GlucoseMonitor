@@ -12,6 +12,7 @@ import android.widget.Toast
 import androidx.fragment.app.activityViewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import java.util.*
 
 private const val TAG = "HistoryFragment"
 
@@ -19,9 +20,6 @@ class HistoryFragment : Fragment(R.layout.history_view) {
 
     private val glucoseViewModel: GlucoseViewModel by activityViewModels()
     private lateinit var rView: RecyclerView
-
-    // TODO: commented this out adapting to Room
-    // private lateinit var rViewAdapter: RecyclerView.Adapter<*>
 
     private lateinit var rViewManager: RecyclerView.LayoutManager
     private var rViewAdapter: GlucoseRViewAdapter? = GlucoseRViewAdapter(emptyList())
@@ -38,7 +36,8 @@ class HistoryFragment : Fragment(R.layout.history_view) {
 
         fun bind(glucose: Glucose) {
             this.glucose = glucose
-            dateView.text = this.glucose.date.toString()
+
+            dateView.text = DateFormatter.format(this.glucose.date)
 
             avgView.text = GlucoseCalculator.getAverage(
                 this.glucose.fasting,
@@ -118,5 +117,4 @@ class HistoryFragment : Fragment(R.layout.history_view) {
         rViewAdapter = GlucoseRViewAdapter(glucoseList)
         rView.adapter = rViewAdapter
     }
-
 }
