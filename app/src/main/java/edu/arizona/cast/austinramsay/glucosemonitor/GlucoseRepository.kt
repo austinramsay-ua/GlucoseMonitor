@@ -5,6 +5,7 @@ import androidx.room.Room
 import androidx.lifecycle.LiveData
 import edu.arizona.cast.austinramsay.glucosemonitor.database.GlucoseDatabase
 import java.util.*
+import java.util.concurrent.Executors
 
 private const val DATABASE_NAME = "glucose-database"
 
@@ -15,10 +16,24 @@ class GlucoseRepository private constructor(context: Context) {
         GlucoseDatabase::class.java,
         DATABASE_NAME
     ).build()
-
     private val glucoseDao = database.glucoseDao()
+    private val executor = Executors.newSingleThreadExecutor()
+
     fun getGlucoseList(): LiveData<List<Glucose>> = glucoseDao.getGlucoseList()
-    fun getGlucose(date: Long): LiveData<Glucose?> = glucoseDao.getGlucose(date)
+
+    fun getGlucose(date: Date): LiveData<Glucose?> = glucoseDao.getGlucose(date)
+
+    fun updateGlucose(glucose: Glucose) {
+        executor.execute {
+            glucoseDao.updateGlucose(glucose)
+        }
+    }
+
+    fun addGlucose(glucose: Glucose) {
+        executor.execute {
+            glucoseDao.addGlucose(glucose)
+        }
+    }
 
     companion object {
         private var INSTANCE: GlucoseRepository? = null

@@ -1,5 +1,6 @@
 package edu.arizona.cast.austinramsay.glucosemonitor
 
+import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import androidx.fragment.app.Fragment
@@ -20,9 +21,26 @@ class HistoryFragment : Fragment(R.layout.history_view) {
 
     private val glucoseViewModel: GlucoseViewModel by activityViewModels()
     private lateinit var rView: RecyclerView
-
     private lateinit var rViewManager: RecyclerView.LayoutManager
     private var rViewAdapter: GlucoseRViewAdapter? = GlucoseRViewAdapter(emptyList())
+
+    /*
+     * Interface for switching between fragments
+     */
+    interface Callbacks {
+        fun onGlucoseSelected(glucoseDate: Date)
+    }
+
+    private var callbacks: Callbacks? = null
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        callbacks = context as Callbacks?
+    }
+
+    override fun onDetach() {
+        super.onDetach()
+        callbacks = null
+    }
 
     /*
      * RecyclerView Adapter and Holder classes
@@ -76,6 +94,7 @@ class HistoryFragment : Fragment(R.layout.history_view) {
             // When an item is clicked on, display a Toast with the Glucose details
             holder.itemView.setOnClickListener {
                 Toast.makeText(context, glucose.toString(), Toast.LENGTH_LONG).show()
+                callbacks?.onGlucoseSelected(glucose.date)
             }
         }
 

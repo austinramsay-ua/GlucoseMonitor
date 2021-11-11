@@ -14,13 +14,16 @@ import java.time.LocalDateTime
 import android.widget.Button
 import android.widget.EditText
 import androidx.lifecycle.Observer
+import java.util.*
 
 private const val TAG = "InputFragment"
+private const val ARG_GLUCOSE_DATE = "glucose_date"
 
 class InputFragment : Fragment(R.layout.input_fragment) {
 
     private val glucoseViewModel: GlucoseViewModel by activityViewModels()
 
+    private lateinit var glucose: Glucose
     private lateinit var dateButton: Button
     private lateinit var clearButton: Button
     private lateinit var historyButton: Button
@@ -29,8 +32,37 @@ class InputFragment : Fragment(R.layout.input_fragment) {
     private lateinit var lunchInput: EditText
     private lateinit var dinnerInput: EditText
 
+    companion object {
+        fun newInstance(glucoseDate: Date): InputFragment {
+            val args = Bundle().apply {
+                putSerializable(ARG_GLUCOSE_DATE, glucoseDate)
+            }
+            return InputFragment().apply {
+                arguments = args
+            }
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // Retrieve data from set fragment arguments
+        glucose = Glucose()
+        val glucoseDate: Date = arguments?.getSerializable(ARG_GLUCOSE_DATE) as Date
+        Log.d(TAG, "args bundle glucose date retreived: $glucoseDate")
+        glucoseViewModel.loadGlucose(glucoseDate)
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        glucoseViewModel.glucose.observe(viewLifecycleOwner, Observer { glucose ->
+            glucose?.let {
+                this.glucose = glucose
+                glucoseViewModel.sync()
+                sync()
+            }
+        })
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -52,12 +84,7 @@ class InputFragment : Fragment(R.layout.input_fragment) {
             }
 
             override fun onTextChanged(sequence: CharSequence?, start: Int, before: Int, count: Int) {
-                glucoseViewModel.updateGlucose(
-                    fasting = fastingInput.text.toString().toIntOrNull() ?: 0,
-                    breakfast = breakfastInput.text.toString().toIntOrNull() ?: 0,
-                    lunch = lunchInput.text.toString().toIntOrNull() ?: 0,
-                    dinner = dinnerInput.text.toString().toIntOrNull() ?: 0
-                )
+                // removed old code for assignment 9
             }
 
             override fun afterTextChanged(sequence: Editable?) {
@@ -82,12 +109,12 @@ class InputFragment : Fragment(R.layout.input_fragment) {
             clearFields()
         }
 
-        // If the view model's glucose object changes, reflect the colors of the UI to match
-        glucoseViewModel.glucose.observe(this, Observer {
-            sync()
-        })
-
         return view
+    }
+
+    override fun onStop() {
+        super.onStop()
+        glucoseViewModel.saveGlucose(glucose)
     }
 
     // Check if any input fields are blank (fasting, breakfast, lunch or dinner glucose values)
@@ -106,20 +133,23 @@ class InputFragment : Fragment(R.layout.input_fragment) {
         breakfastInput.text = null
         lunchInput.text = null
         dinnerInput.text = null
-        glucoseViewModel.glucose.value = null
 
         // Reset date button to now
         dateButton.text = LocalDateTime.now().format(glucoseViewModel.dateFormatterFull)
     }
 
     private fun sync() {
+        fastingInput.setText(glucose.fasting.toString())
+        breakfastInput.setText(glucose.breakfast.toString())
+        lunchInput.setText(glucose.lunch.toString())
+        dinnerInput.setText(glucose.dinner.toString())
+
         fastingInput.setTextColor(glucoseViewModel.fastingColor)
         breakfastInput.setTextColor(glucoseViewModel.breakfastColor)
         lunchInput.setTextColor(glucoseViewModel.lunchColor)
         dinnerInput.setTextColor(glucoseViewModel.dinnerColor)
 
         // Update the date button to the glucose date too
-        //dateButton.text = glucoseViewModel.glucose.value?.date?.format(glucoseViewModel.dateFormatterFull)
-        dateButton.text = glucoseViewModel.glucose.value?.date?.toString()
+        dateButton.text = glucose.date.toString()
     }
 }
