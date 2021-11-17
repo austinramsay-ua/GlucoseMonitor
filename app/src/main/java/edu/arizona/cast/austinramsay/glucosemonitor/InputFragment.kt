@@ -1,5 +1,6 @@
 package edu.arizona.cast.austinramsay.glucosemonitor
 
+import android.graphics.Color
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -23,7 +24,10 @@ class InputFragment : Fragment(R.layout.input_fragment) {
 
     private val glucoseViewModel: GlucoseViewModel by activityViewModels()
 
+    // Local glucose object separated from the view model's glucose object
     private lateinit var glucose: Glucose
+
+    // UI elements
     private lateinit var dateButton: Button
     private lateinit var clearButton: Button
     private lateinit var historyButton: Button
@@ -56,11 +60,46 @@ class InputFragment : Fragment(R.layout.input_fragment) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        // Create a text watcher to apply to all EditText inputs for glucose values
+        // Upon values being changed, update the glucose object IF all values are filled
+        val valueWatcher = object : TextWatcher {
+            override fun beforeTextChanged(sequence: CharSequence?, start: Int, count: Int, after: Int) {
+                // do nothing
+            }
+
+            override fun onTextChanged(sequence: CharSequence?, start: Int, before: Int, count: Int) {
+                // On text changed (after the initial values from the glucose object were extracted
+                // and set into the input fields), change the text color back to default
+                // The colors are no longer accurate once values are changed
+                fastingInput.setTextColor(glucoseViewModel.defaultColor)
+                breakfastInput.setTextColor(glucoseViewModel.defaultColor)
+                lunchInput.setTextColor(glucoseViewModel.defaultColor)
+                dinnerInput.setTextColor(glucoseViewModel.defaultColor)
+
+                fastingInput.removeTextChangedListener(this)
+                breakfastInput.removeTextChangedListener(this)
+                lunchInput.removeTextChangedListener(this)
+                dinnerInput.removeTextChangedListener(this)
+            }
+
+            override fun afterTextChanged(sequence: Editable?) {
+                // do nothing
+            }
+        }
+
+        // When the view model glucose object changes, sync this fragments glucose object to the
+        // updated view model
         glucoseViewModel.glucose.observe(viewLifecycleOwner, Observer { glucose ->
             glucose?.let {
                 this.glucose = glucose
-                glucoseViewModel.sync()
-                sync()
+                glucoseViewModel.sync(this.glucose)
+                syncAll()
+
+                // Apply the text watcher to all input fields
+                fastingInput.addTextChangedListener(valueWatcher)
+                breakfastInput.addTextChangedListener(valueWatcher)
+                lunchInput.addTextChangedListener(valueWatcher)
+                dinnerInput.addTextChangedListener(valueWatcher)
             }
         })
     }
@@ -76,37 +115,25 @@ class InputFragment : Fragment(R.layout.input_fragment) {
         lunchInput = view.findViewById(R.id.et_lunch)
         dinnerInput = view.findViewById(R.id.et_dinner)
 
-        // Create a text watcher to apply to all EditText inputs for glucose values
-        // Upon values being changed, update the glucose object IF all values are filled
-        val valueWatcher = object : TextWatcher {
-            override fun beforeTextChanged(sequence: CharSequence?, start: Int, count: Int, after: Int) {
-                // do nothing
-            }
-
-            override fun onTextChanged(sequence: CharSequence?, start: Int, before: Int, count: Int) {
-                // removed old code for assignment 9
-            }
-
-            override fun afterTextChanged(sequence: Editable?) {
-                // do nothing
-            }
-        }
-
-        // Apply the text watcher to all input fields
-        fastingInput.addTextChangedListener(valueWatcher)
-        breakfastInput.addTextChangedListener(valueWatcher)
-        lunchInput.addTextChangedListener(valueWatcher)
-        dinnerInput.addTextChangedListener(valueWatcher)
-
         // Setup the date button (only shows date for now, no logic)
         dateButton.text = LocalDateTime.now().format(glucoseViewModel.dateFormatterFull)
-
-        // Setup the history button (disabled for now)
-        historyButton.isEnabled = false
 
         // Setup the clear button
         clearButton.setOnClickListener {
             clearFields()
+        }
+
+        // Setup the history button to save values to the glucose object and then call the
+        // 'saveGlucose' function in the view model to update the object in the database
+        historyButton.setOnClickListener {
+            // Update all the local glucose object values before pushing to database
+            glucose.fasting = fastingInput.text.toString().toIntOrNull() ?: 0
+            glucose.breakfast = breakfastInput.text.toString().toIntOrNull() ?: 0
+            glucose.lunch = lunchInput.text.toString().toIntOrNull() ?: 0
+            glucose.dinner = dinnerInput.text.toString().toIntOrNull() ?: 0
+
+            // The 'onStop' fragment function we overrode will save the glucose on exit
+            activity?.supportFragmentManager?.popBackStack()
         }
 
         return view
@@ -114,6 +141,8 @@ class InputFragment : Fragment(R.layout.input_fragment) {
 
     override fun onStop() {
         super.onStop()
+
+        // When the fragment stops, save the glucose object into the database
         glucoseViewModel.saveGlucose(glucose)
     }
 
@@ -138,18 +167,22 @@ class InputFragment : Fragment(R.layout.input_fragment) {
         dateButton.text = LocalDateTime.now().format(glucoseViewModel.dateFormatterFull)
     }
 
-    private fun sync() {
+    private fun syncAll() {
         fastingInput.setText(glucose.fasting.toString())
         breakfastInput.setText(glucose.breakfast.toString())
         lunchInput.setText(glucose.lunch.toString())
         dinnerInput.setText(glucose.dinner.toString())
 
+        syncColors()
+
+        // Update the date button to the glucose date too
+        dateButton.text = glucose.date.toString()
+    }
+
+    private fun syncColors() {
         fastingInput.setTextColor(glucoseViewModel.fastingColor)
         breakfastInput.setTextColor(glucoseViewModel.breakfastColor)
         lunchInput.setTextColor(glucoseViewModel.lunchColor)
         dinnerInput.setTextColor(glucoseViewModel.dinnerColor)
-
-        // Update the date button to the glucose date too
-        dateButton.text = glucose.date.toString()
     }
 }

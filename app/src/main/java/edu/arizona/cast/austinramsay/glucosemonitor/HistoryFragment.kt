@@ -93,7 +93,6 @@ class HistoryFragment : Fragment(R.layout.history_view) {
 
             // When an item is clicked on, display a Toast with the Glucose details
             holder.itemView.setOnClickListener {
-                Toast.makeText(context, glucose.toString(), Toast.LENGTH_LONG).show()
                 callbacks?.onGlucoseSelected(glucose.date)
             }
         }

@@ -13,9 +13,11 @@ private const val TAG = "GlucoseViewModel"
 
 class GlucoseViewModel : ViewModel() {
 
-    // Data values
     private val glucoseRepository = GlucoseRepository.get()
     val glucoseList = glucoseRepository.getGlucoseList()
+
+    // When the glucose date is changed,the view model will automatically query the database
+    // and retrieve the corresponding object stored in the database
     private val glucoseDateLiveData = MutableLiveData<Date>()
     var glucose: LiveData<Glucose?> =
         Transformations.switchMap(glucoseDateLiveData) { glucoseDate ->
@@ -39,26 +41,25 @@ class GlucoseViewModel : ViewModel() {
     }
 
     // TODO: modify this for livedata, don't need to update manually anymore but still need colors
-    // If the object already has a date, use it, otherwise stamp it now
-    fun sync() {
+    fun sync(source: Glucose) {
 
         // Update the UI input and output field colors to match the calculated glucose value status (normal, abnormal, etc)
-        fastingColor = when(GlucoseCalculator.getFastingStatus(glucose.value?.fasting )) {
+        fastingColor = when(GlucoseCalculator.getFastingStatus(source.fasting)) {
             GlucoseCalculator.STATUS_NORMAL -> Color.rgb(0, 140, 0)
             GlucoseCalculator.STATUS_NONE -> defaultColor
             else -> Color.rgb(170, 0, 0)
         }
-        breakfastColor = when(GlucoseCalculator.getBreakfastStatus(glucose.value?.breakfast)) {
+        breakfastColor = when(GlucoseCalculator.getBreakfastStatus(source.breakfast)) {
             GlucoseCalculator.STATUS_NORMAL -> Color.rgb(0, 140, 0)
             GlucoseCalculator.STATUS_NONE -> defaultColor
             else -> Color.rgb(170, 0, 0)
         }
-        lunchColor = when(GlucoseCalculator.getLunchStatus(glucose.value?.lunch)) {
+        lunchColor = when(GlucoseCalculator.getLunchStatus(source.lunch)) {
             GlucoseCalculator.STATUS_NORMAL -> Color.rgb(0, 140, 0)
             GlucoseCalculator.STATUS_NONE -> defaultColor
             else -> Color.rgb(170, 0, 0)
         }
-        dinnerColor = when(GlucoseCalculator.getDinnerStatus(glucose.value?.dinner)) {
+        dinnerColor = when(GlucoseCalculator.getDinnerStatus(source.dinner)) {
             GlucoseCalculator.STATUS_NORMAL -> Color.rgb(0, 140, 0)
             GlucoseCalculator.STATUS_NONE -> defaultColor
             else -> Color.rgb(170, 0, 0)
