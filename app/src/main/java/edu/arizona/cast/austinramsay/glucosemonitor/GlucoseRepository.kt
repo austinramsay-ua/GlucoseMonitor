@@ -3,6 +3,7 @@ package edu.arizona.cast.austinramsay.glucosemonitor
 import android.content.Context
 import androidx.room.Room
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import edu.arizona.cast.austinramsay.glucosemonitor.database.GlucoseDatabase
 import java.util.*
 import java.util.concurrent.Executors
@@ -22,6 +23,8 @@ class GlucoseRepository private constructor(context: Context) {
     fun getGlucoseList(): LiveData<List<Glucose>> = glucoseDao.getGlucoseList()
 
     fun getGlucose(date: Date): LiveData<Glucose?> = glucoseDao.getGlucose(date)
+
+    fun checkExists(date: Date): LiveData<Boolean> = glucoseDao.checkExists(date)
 
     fun updateGlucose(glucose: Glucose) {
         executor.execute {

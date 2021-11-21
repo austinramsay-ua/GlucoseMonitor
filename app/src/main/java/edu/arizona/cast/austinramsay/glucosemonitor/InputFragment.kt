@@ -94,12 +94,10 @@ class InputFragment : Fragment(R.layout.input_fragment), FragmentResultListener 
             // Check if the database had any entries for this date, if not, create a new one
             if (glucose.date != glucoseViewModel.glucose.value?.date) {
                 // The requested glucose date was not found in the database, create it now
-                Log.d(TAG, "ADD")
                 glucoseViewModel.addGlucose(glucose)
                 glucoseViewModel.loadGlucose(glucose.date)
             } else {
                 glucoseViewModel.updateGlucose(glucose)
-                Log.d(TAG, "UPDATE")
             }
 
             activity?.supportFragmentManager?.popBackStack()
@@ -176,16 +174,24 @@ class InputFragment : Fragment(R.layout.input_fragment), FragmentResultListener 
             REQUEST_DATE -> {
                 Log.d(TAG, "Received result for $requestCode")
 
-                // Here we should check if there is an existing glucose object for the newly
-                // selected date. If there is an object matching the date in the database we should
-                // swap to it and re-sync the UI now. If not, create a new one and upload it.
-
                 glucose.date = DatePickerFragment.getSelectedDate(result)
+
+                glucoseViewModel.checkExists(DatePickerFragment.getSelectedDate(result)).observe(viewLifecycleOwner, Observer { exists ->
+                    if (exists) {
+                        Toast.makeText(context, "A previous entry was found with the selected date and is now shown above.", Toast.LENGTH_LONG).show()
+                    } else {
+                        Toast.makeText(context, "No existing entry was found with the selected date. A new entry will be created upon tapping 'History'.", Toast.LENGTH_LONG).show()
+                        clearFields()
+                    }
+                })
+
+                // Attempt to load a glucose object from the database using selected date
+                // The database might not have an entry with the selected date, this is fine
+                // The entry will be added later if needed
                 glucoseViewModel.loadGlucose(DatePickerFragment.getSelectedDate(result))
 
-                if (glucose.date != glucoseViewModel.glucose.value?.date) {
-                    syncAll()
-                }
+                // Update the date button to match the newly selected date
+                syncAll()
             }
         }
     }
@@ -206,9 +212,6 @@ class InputFragment : Fragment(R.layout.input_fragment), FragmentResultListener 
         breakfastInput.text = null
         lunchInput.text = null
         dinnerInput.text = null
-
-        // Reset date button to now
-        dateButton.text = LocalDateTime.now().format(glucoseViewModel.dateFormatterFull)
     }
 
     private fun syncAll() {

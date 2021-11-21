@@ -16,12 +16,20 @@ class GlucoseViewModel : ViewModel() {
     private val glucoseRepository = GlucoseRepository.get()
     val glucoseList = glucoseRepository.getGlucoseList()
 
+    fun checkExists(date: Date) = glucoseRepository.checkExists(date)
+
     // When the glucose date is changed,the view model will automatically query the database
     // and retrieve the corresponding object stored in the database
     private val glucoseDateLiveData = MutableLiveData<Date>()
     var glucose: LiveData<Glucose?> =
         Transformations.switchMap(glucoseDateLiveData) { glucoseDate ->
             glucoseRepository.getGlucose(glucoseDate)
+            // TODO: This might be useful later?
+            /*glucoseRepository.getGlucose(glucoseDate).also {
+                it.value?.date?.hours = 0
+                it.value?.date?.minutes = 0
+                it.value?.date?.seconds = 0
+            }*/
         }
 
     // UI values
