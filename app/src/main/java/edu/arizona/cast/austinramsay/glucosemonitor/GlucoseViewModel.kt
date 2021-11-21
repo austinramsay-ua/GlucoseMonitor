@@ -1,11 +1,11 @@
 package edu.arizona.cast.austinramsay.glucosemonitor
 
 import android.graphics.Color
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Transformations
 import androidx.lifecycle.ViewModel
-import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.*
 
@@ -36,8 +36,12 @@ class GlucoseViewModel : ViewModel() {
         glucoseDateLiveData.value = glucoseDate
     }
 
-    fun saveGlucose(glucose: Glucose) {
+    fun updateGlucose(glucose: Glucose) {
         glucoseRepository.updateGlucose(glucose)
+    }
+
+    fun addGlucose(glucose: Glucose) {
+        glucoseRepository.addGlucose(glucose)
     }
 
     // TODO: modify this for livedata, don't need to update manually anymore but still need colors

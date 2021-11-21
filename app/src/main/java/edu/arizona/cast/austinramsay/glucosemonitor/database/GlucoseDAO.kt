@@ -1,10 +1,7 @@
 package edu.arizona.cast.austinramsay.glucosemonitor.database
 
-import androidx.room.Dao
-import androidx.room.Query
-import androidx.room.Insert
 import androidx.lifecycle.LiveData
-import androidx.room.Update
+import androidx.room.*
 import java.util.*
 import edu.arizona.cast.austinramsay.glucosemonitor.Glucose
 
@@ -20,6 +17,6 @@ interface GlucoseDAO {
     @Update
     fun updateGlucose(glucose: Glucose)
 
-    @Insert
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun addGlucose(glucose: Glucose)
 }

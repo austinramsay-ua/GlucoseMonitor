@@ -4,6 +4,7 @@
     <option name="filePathToZoomLevelMap">
       <map>
         <entry key="app/src/main/res/layout/activity_main.xml" value="0.25" />
+        <entry key="app/src/main/res/layout/date_picker_fragment.xml" value="0.20108695652173914" />
         <entry key="app/src/main/res/layout/history_view.xml" value="0.18541033434650456" />
         <entry key="app/src/main/res/layout/input_fragment.xml" value="0.213768115942029" />
         <entry key="app/src/main/res/layout/input_overview.xml" value="0.335" />
