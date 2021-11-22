@@ -37,6 +37,11 @@ class InputFragment : Fragment(R.layout.input_fragment), FragmentResultListener 
     private lateinit var breakfastInput: EditText
     private lateinit var lunchInput: EditText
     private lateinit var dinnerInput: EditText
+    private lateinit var dateOutput: TextView
+    private lateinit var fastingOutput: TextView
+    private lateinit var breakfastOutput: TextView
+    private lateinit var lunchOutput: TextView
+    private lateinit var dinnerOutput: TextView
 
     companion object {
         fun newInstance(glucoseDate: Date): InputFragment {
@@ -69,6 +74,11 @@ class InputFragment : Fragment(R.layout.input_fragment), FragmentResultListener 
         breakfastInput = view.findViewById(R.id.et_breakfast)
         lunchInput = view.findViewById(R.id.et_lunch)
         dinnerInput = view.findViewById(R.id.et_dinner)
+        dateOutput = view.findViewById(R.id.date_overview_label)
+        fastingOutput = view.findViewById(R.id.fasting_overview_output)
+        breakfastOutput = view.findViewById(R.id.breakfast_overview_output)
+        lunchOutput = view.findViewById(R.id.lunch_overview_output)
+        dinnerOutput = view.findViewById(R.id.dinner_overview_output)
 
         // Setup the date button (only shows date for now, no logic)
         dateButton.text = LocalDateTime.now().format(glucoseViewModel.dateFormatterFull)
@@ -215,6 +225,12 @@ class InputFragment : Fragment(R.layout.input_fragment), FragmentResultListener 
     }
 
     private fun syncAll() {
+        dateOutput.text = glucose.date.toString()
+        fastingOutput.text = GlucoseCalculator.getFastingStatus(glucose.fasting)
+        breakfastOutput.text = GlucoseCalculator.getBreakfastStatus(glucose.breakfast)
+        lunchOutput.text = GlucoseCalculator.getLunchStatus(glucose.lunch)
+        dinnerOutput.text = GlucoseCalculator.getDinnerStatus(glucose.dinner)
+
         fastingInput.setTextColor(glucoseViewModel.fastingColor)
         breakfastInput.setTextColor(glucoseViewModel.breakfastColor)
         lunchInput.setTextColor(glucoseViewModel.lunchColor)
