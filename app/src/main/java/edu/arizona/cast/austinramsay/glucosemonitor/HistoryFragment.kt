@@ -9,7 +9,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.CheckBox
 import android.widget.TextView
-import android.widget.Toast
 import androidx.fragment.app.activityViewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -19,7 +18,7 @@ private const val TAG = "HistoryFragment"
 
 class HistoryFragment : Fragment(R.layout.history_view) {
 
-    private val glucoseViewModel: GlucoseViewModel by activityViewModels()
+    private val glucoseViewModel: DBViewModel by activityViewModels()
     private lateinit var rView: RecyclerView
     private lateinit var rViewManager: RecyclerView.LayoutManager
     private var rViewAdapter: GlucoseRViewAdapter? = GlucoseRViewAdapter(emptyList())
