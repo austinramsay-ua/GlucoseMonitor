@@ -55,7 +55,7 @@ class HistoryFragment : Fragment(R.layout.history_view) {
         fun bind(glucose: Glucose) {
             this.glucose = glucose
 
-            dateView.text = DateFormatter.format(this.glucose.date)
+            dateView.text = DateFormatter.formatShort(this.glucose.date)
 
             avgView.text = GlucoseCalculator.getAverage(
                 this.glucose.fasting,

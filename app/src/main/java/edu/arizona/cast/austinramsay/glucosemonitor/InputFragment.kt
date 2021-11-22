@@ -81,7 +81,6 @@ class InputFragment : Fragment(R.layout.input_fragment), FragmentResultListener 
         dinnerOutput = view.findViewById(R.id.dinner_overview_output)
 
         // Setup the date button (only shows date for now, no logic)
-        dateButton.text = LocalDateTime.now().format(glucoseViewModel.dateFormatterFull)
         dateButton.setOnClickListener {
             DatePickerFragment.newInstance(glucose.date, REQUEST_DATE).show(childFragmentManager, REQUEST_DATE)
         }
@@ -225,7 +224,7 @@ class InputFragment : Fragment(R.layout.input_fragment), FragmentResultListener 
     }
 
     private fun syncAll() {
-        dateOutput.text = glucose.date.toString()
+        dateOutput.text = DateFormatter.formatLong(glucose.date)
         fastingOutput.text = GlucoseCalculator.getFastingStatus(glucose.fasting)
         breakfastOutput.text = GlucoseCalculator.getBreakfastStatus(glucose.breakfast)
         lunchOutput.text = GlucoseCalculator.getLunchStatus(glucose.lunch)
@@ -236,6 +235,6 @@ class InputFragment : Fragment(R.layout.input_fragment), FragmentResultListener 
         lunchInput.setTextColor(glucoseViewModel.lunchColor)
         dinnerInput.setTextColor(glucoseViewModel.dinnerColor)
 
-        dateButton.text = glucose.date.toString()
+        dateButton.text = DateFormatter.formatLong(glucose.date)
     }
 }
