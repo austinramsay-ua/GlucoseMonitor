@@ -13,7 +13,6 @@ import androidx.fragment.app.activityViewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import java.util.*
-import java.util.GregorianCalendar
 
 private const val TAG = "HistoryFragment"
 private const val REQUEST_DATE = "DialogDate"
@@ -24,11 +23,7 @@ class HistoryFragment : Fragment(R.layout.history_view), FragmentResultListener 
     private lateinit var rView: RecyclerView
     private lateinit var rViewManager: RecyclerView.LayoutManager
     private var rViewAdapter: GlucoseRViewAdapter? = GlucoseRViewAdapter(emptyList())
-
-    /*private var dateNow = GregorianCalendar(Calendar.getInstance().get(Calendar.YEAR),
-        Calendar.getInstance().get(Calendar.MONTH),
-        Calendar.getInstance().get(Calendar.DAY_OF_MONTH)).time*/
-    private lateinit var dateDialog: DatePickerFragment //= DatePickerFragment.newInstance(dateNow, REQUEST_DATE)
+    private lateinit var dateDialog: DatePickerFragment
 
     /*
      * Interface for switching between fragments
@@ -76,11 +71,14 @@ class HistoryFragment : Fragment(R.layout.history_view), FragmentResultListener 
                 this.glucose.lunch,
                 this.glucose.dinner)
 
+            // If the status for each value (fasting, breakfast, lunch and dinner) are ALL normal, check the box
+            // If ANY one of the values are NOT normal, do NOT check the box
+            val fastingCheck = (GlucoseCalculator.getFastingStatus(this.glucose.fasting) == GlucoseCalculator.STATUS_NORMAL)
+            val breakfastCheck = (GlucoseCalculator.getBreakfastStatus(this.glucose.breakfast) == GlucoseCalculator.STATUS_NORMAL)
+            val lunchCheck = (GlucoseCalculator.getLunchStatus(this.glucose.lunch) == GlucoseCalculator.STATUS_NORMAL)
+            val dinnerCheck = (GlucoseCalculator.getDinnerStatus(this.glucose.dinner) == GlucoseCalculator.STATUS_NORMAL)
             statusCheck.isChecked = when {
-                GlucoseCalculator.getFastingStatus(this.glucose.fasting) != GlucoseCalculator.STATUS_NORMAL -> true
-                GlucoseCalculator.getBreakfastStatus(this.glucose.breakfast) != GlucoseCalculator.STATUS_NORMAL -> true
-                GlucoseCalculator.getLunchStatus(this.glucose.lunch) != GlucoseCalculator.STATUS_NORMAL -> true
-                GlucoseCalculator.getDinnerStatus(this.glucose.dinner) != GlucoseCalculator.STATUS_NORMAL -> true
+                (fastingCheck && breakfastCheck && lunchCheck && dinnerCheck) -> true
                 else -> false
             }
         }
@@ -105,6 +103,10 @@ class HistoryFragment : Fragment(R.layout.history_view), FragmentResultListener 
         override fun getItemCount() = glucoseList.size
     }
 
+
+    /*
+     * Main fragment logic begins
+     */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setHasOptionsMenu(true)
