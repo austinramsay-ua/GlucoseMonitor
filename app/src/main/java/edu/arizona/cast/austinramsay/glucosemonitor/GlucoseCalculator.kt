@@ -7,6 +7,7 @@ class GlucoseCalculator {
         const val STATUS_ABNORMAL = "Abnormal"
         const val STATUS_HYPOGLYCEMIC= "Hypoglycemic"
         const val STATUS_NONE = "No Value"
+        const val STATUS_INCOMPLETE = "Incomplete"
 
         fun getRandomGlucoseLevel(): Int {
             // Return a reasonable glucose level, which would be between 60 and 180
@@ -67,6 +68,7 @@ class GlucoseCalculator {
             val average = ((f + b + l + d) / 4)
 
             return when {
+                (fasting == 0 || breakfast == 0 || lunch == 0 || dinner == 0) -> STATUS_INCOMPLETE
                 (average < 70) -> STATUS_HYPOGLYCEMIC
                 (average > 140) -> STATUS_ABNORMAL
                 else -> STATUS_NORMAL

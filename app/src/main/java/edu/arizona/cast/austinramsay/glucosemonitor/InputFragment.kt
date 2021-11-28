@@ -127,7 +127,6 @@ class InputFragment : Fragment(R.layout.input_fragment), FragmentResultListener 
                 // Push new values to the input fragment's local view model and update the UI
                 inputViewModel.updateGlucoseLevels(fasting, breakfast, lunch, dinner)
                 updateUI()
-                Log.d(TAG, "onTextChanged")
             }
 
             override fun afterTextChanged(sequence: Editable?) {
