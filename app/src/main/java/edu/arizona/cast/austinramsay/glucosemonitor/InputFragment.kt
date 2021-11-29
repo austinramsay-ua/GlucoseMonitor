@@ -1,5 +1,6 @@
 package edu.arizona.cast.austinramsay.glucosemonitor
 
+import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -12,6 +13,7 @@ import android.widget.Button
 import android.widget.EditText
 import androidx.lifecycle.Observer
 import androidx.fragment.app.FragmentResultListener
+import java.text.DateFormat
 import java.util.*
 
 private const val TAG = "InputFragment"
@@ -223,7 +225,14 @@ class InputFragment : Fragment(R.layout.input_fragment), FragmentResultListener 
                 true
             }
             R.id.send_glucose_button -> {
-                Toast.makeText(context, "Send!", Toast.LENGTH_SHORT).show()
+                Intent(Intent.ACTION_SEND).apply {
+                    type = "text/plain"
+                    putExtra(Intent.EXTRA_TEXT, getGlucoseReport())
+                    putExtra(Intent.EXTRA_SUBJECT, "Glucose Report for ${DateFormatter.formatShort(inputViewModel.glucose.date)}")
+                }.also { intent ->
+                    val chooserIntent = Intent.createChooser(intent, getString(R.string.send_glucose))
+                    startActivity(chooserIntent)
+                }
                 true
             }
             else -> return super.onOptionsItemSelected(item)
@@ -231,7 +240,6 @@ class InputFragment : Fragment(R.layout.input_fragment), FragmentResultListener 
     }
 
     private fun clearFields() {
-        // Clear all input fields
         fastingInput.text = null
         breakfastInput.text = null
         lunchInput.text = null
@@ -251,5 +259,20 @@ class InputFragment : Fragment(R.layout.input_fragment), FragmentResultListener 
         dinnerInput.setTextColor(inputViewModel.dinnerColor)
 
         dateButton.text = DateFormatter.formatLong(inputViewModel.glucose.date)
+    }
+
+    private fun getGlucoseReport(): String {
+        val report = StringBuilder()
+
+        report.appendLine("Glucose Entry Date: ${DateFormatter.formatLong(inputViewModel.glucose.date)}")
+        report.appendLine()
+        report.appendLine("Overall Average: ${GlucoseCalculator.getAverage(inputViewModel.glucose.fasting, inputViewModel.glucose.breakfast, inputViewModel.glucose.lunch, inputViewModel.glucose.dinner)}")
+        report.appendLine()
+        report.appendLine("Fasting: ${GlucoseCalculator.getFastingStatus(inputViewModel.glucose.fasting)} (${inputViewModel.glucose.fasting})")
+        report.appendLine("Breakfast: ${GlucoseCalculator.getBreakfastStatus(inputViewModel.glucose.breakfast)} (${inputViewModel.glucose.breakfast})")
+        report.appendLine("Lunch: ${GlucoseCalculator.getLunchStatus(inputViewModel.glucose.lunch)} (${inputViewModel.glucose.lunch})")
+        report.appendLine("Dinner: ${GlucoseCalculator.getDinnerStatus(inputViewModel.glucose.dinner)} (${inputViewModel.glucose.dinner})")
+
+        return report.toString()
     }
 }
