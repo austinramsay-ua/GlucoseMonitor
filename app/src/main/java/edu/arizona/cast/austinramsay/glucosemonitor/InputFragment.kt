@@ -4,10 +4,8 @@ import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
+import android.view.*
 import androidx.fragment.app.Fragment
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
 import android.widget.*
 import androidx.fragment.app.activityViewModels
 import android.widget.Button
@@ -52,6 +50,8 @@ class InputFragment : Fragment(R.layout.input_fragment), FragmentResultListener 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        setHasOptionsMenu(true)
 
         // Retrieve selected date from fragment arguments passed from the MainActivity
         val glucoseDate: Date = arguments?.getSerializable(ARG_GLUCOSE_DATE) as Date
@@ -179,6 +179,11 @@ class InputFragment : Fragment(R.layout.input_fragment), FragmentResultListener 
         childFragmentManager.setFragmentResultListener(REQUEST_DATE, viewLifecycleOwner, this)
     }
 
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        super.onCreateOptionsMenu(menu, inflater)
+        inflater.inflate(R.menu.fragment_glucose_input, menu)
+    }
+
     override fun onStop() {
         super.onStop()
     }
@@ -206,6 +211,22 @@ class InputFragment : Fragment(R.layout.input_fragment), FragmentResultListener 
                 // The entry will be added later if needed
                 dbViewModel.loadGlucose(DatePickerFragment.getSelectedDate(result))
             }
+        }
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            R.id.delete_glucose_button -> {
+                dbViewModel.deleteGlucose(inputViewModel.glucose)
+                Toast.makeText(context, "Entry for ${DateFormatter.formatShort(inputViewModel.glucose.date)} deleted.", Toast.LENGTH_SHORT).show()
+                activity?.supportFragmentManager?.popBackStack()
+                true
+            }
+            R.id.send_glucose_button -> {
+                Toast.makeText(context, "Send!", Toast.LENGTH_SHORT).show()
+                true
+            }
+            else -> return super.onOptionsItemSelected(item)
         }
     }
 

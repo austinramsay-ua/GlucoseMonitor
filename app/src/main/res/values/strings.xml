@@ -13,4 +13,6 @@
     <string name="lunch_label">Lunch:</string>
     <string name="dinner_label">Dinner:</string>
     <string name="new_glucose">Add Glucose Entry</string>
+    <string name="delete_glucose">Delete Glucose Entry</string>
+    <string name="send_glucose">Send Glucose Entry</string>
 </resources>

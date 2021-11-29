@@ -38,4 +38,7 @@ class DBViewModel : ViewModel() {
         glucoseRepository.addGlucose(glucose)
     }
 
+    fun deleteGlucose(glucose: Glucose) {
+        glucoseRepository.deleteGlucose(glucose)
+    }
 }

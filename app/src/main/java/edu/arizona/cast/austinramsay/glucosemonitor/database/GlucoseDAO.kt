@@ -23,4 +23,7 @@ interface GlucoseDAO {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun addGlucose(glucose: Glucose)
+
+    @Delete
+    fun deleteGlucose(glucose: Glucose)
 }

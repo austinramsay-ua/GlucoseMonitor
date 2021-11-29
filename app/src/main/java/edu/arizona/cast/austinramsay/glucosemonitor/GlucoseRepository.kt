@@ -38,6 +38,12 @@ class GlucoseRepository private constructor(context: Context) {
         }
     }
 
+    fun deleteGlucose(glucose: Glucose) {
+        executor.execute {
+            glucoseDao.deleteGlucose(glucose)
+        }
+    }
+
     companion object {
         private var INSTANCE: GlucoseRepository? = null
 
