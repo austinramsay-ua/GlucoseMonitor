@@ -16,4 +16,5 @@
     <string name="new_glucose">Add Glucose Entry</string>
     <string name="delete_glucose">Delete Glucose Entry</string>
     <string name="send_glucose">Send Glucose Entry</string>
+    <string name="upload_glucose">Upload Entry to Database</string>
 </resources>

@@ -3,6 +3,11 @@
     xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
+        android:id="@+id/upload_glucose_button"
+        android:icon="@android:drawable/ic_menu_upload"
+        android:title="@string/upload_glucose"
+        app:showAsAction="ifRoom|withText" />
+    <item
         android:id="@+id/send_glucose_button"
         android:icon="@android:drawable/ic_menu_send"
         android:title="@string/send_glucose"

@@ -13,7 +13,15 @@ import android.widget.Button
 import android.widget.EditText
 import androidx.lifecycle.Observer
 import androidx.fragment.app.FragmentResultListener
-import java.text.DateFormat
+import com.google.gson.GsonBuilder
+import com.google.gson.internal.GsonBuildConfig
+import edu.arizona.cast.austinramsay.glucosemonitor.api.GlucoseApi
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
+import retrofit2.converter.scalars.ScalarsConverterFactory
 import java.util.*
 
 private const val TAG = "InputFragment"
@@ -169,6 +177,10 @@ class InputFragment : Fragment(R.layout.input_fragment), FragmentResultListener 
                 // Update the UI to display the new values
                 updateUI()
 
+                // If this is a new glucose entry or an entry without values, clear the fields to make input easier
+                if (isIncomplete(inputViewModel.glucose))
+                    clearFields()
+
                 // Apply the text watcher to all input fields AFTER the initial values are set
                 // into the input fields to not trigger the watcher prematurely
                 fastingInput.addTextChangedListener(valueWatcher)
@@ -202,7 +214,7 @@ class InputFragment : Fragment(R.layout.input_fragment), FragmentResultListener 
                     if (exists) {
                         Toast.makeText(context, "A previous entry was found with the selected date and is now shown above.", Toast.LENGTH_LONG).show()
                     } else {
-                        Toast.makeText(context, "No existing entry was found with the selected date. A new entry will be created upon tapping 'History'.", Toast.LENGTH_LONG).show()
+                        Toast.makeText(context, "No pre-existing entry. A new entry will be created upon tapping 'History'.", Toast.LENGTH_LONG).show()
                         clearFields()
                         updateUI()
                     }
@@ -219,12 +231,14 @@ class InputFragment : Fragment(R.layout.input_fragment), FragmentResultListener 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             R.id.delete_glucose_button -> {
+                // User is attempting to delete this glucose entry
                 dbViewModel.deleteGlucose(inputViewModel.glucose)
                 Toast.makeText(context, "Entry for ${DateFormatter.formatShort(inputViewModel.glucose.date)} deleted.", Toast.LENGTH_SHORT).show()
                 activity?.supportFragmentManager?.popBackStack()
                 true
             }
             R.id.send_glucose_button -> {
+                // User is attempting to send this glucose entry to another app such as email
                 Intent(Intent.ACTION_SEND).apply {
                     type = "text/plain"
                     putExtra(Intent.EXTRA_TEXT, getGlucoseReport())
@@ -233,6 +247,41 @@ class InputFragment : Fragment(R.layout.input_fragment), FragmentResultListener 
                     val chooserIntent = Intent.createChooser(intent, getString(R.string.send_glucose))
                     startActivity(chooserIntent)
                 }
+                true
+            }
+            R.id.upload_glucose_button -> {
+                // User is attempting to upload this entry into the online database service
+
+                // First check if the user has made any changes versus the extracted database entry
+                if (!isEqual(dbViewModel.glucose.value, inputViewModel.glucose)) {
+                    Toast.makeText(context, "Entry has been modified and hasn't been saved. Please save first.", Toast.LENGTH_SHORT).show()
+                    return true
+                }
+
+                // Verify all fields are filled in
+                if (isIncomplete(inputViewModel.glucose)) {
+                    Toast.makeText(context, "Entry has missing values. Complete all fields and save first.", Toast.LENGTH_SHORT).show()
+                    return true
+                }
+
+                val gson = GsonBuilder().setLenient().create()
+                val retrofit: Retrofit = Retrofit.Builder()
+                    .baseUrl("http://u.arizona.edu/")
+                    .addConverterFactory(ScalarsConverterFactory.create())
+                    .addConverterFactory(GsonConverterFactory.create(gson))
+                    .build()
+                val glucoseApi: GlucoseApi = retrofit.create(GlucoseApi::class.java)
+                val glucoseUploadRequest: Call<String> = glucoseApi.uploadGlucose("austinramsay", "a2391", gson.toJson(inputViewModel.glucose))
+                glucoseUploadRequest.enqueue(object: Callback<String> {
+                    override fun onFailure(call: Call<String>, t: Throwable) {
+                        Toast.makeText(context, "Upload failed. $t", Toast.LENGTH_SHORT).show()
+                    }
+
+                    override fun onResponse(call: Call<String>, response: Response<String>) {
+                        Toast.makeText(context, "Upload successful.", Toast.LENGTH_SHORT).show()
+                        Log.d(TAG, response.toString())
+                    }
+                })
                 true
             }
             else -> return super.onOptionsItemSelected(item)
@@ -274,5 +323,18 @@ class InputFragment : Fragment(R.layout.input_fragment), FragmentResultListener 
         report.appendLine("Dinner: ${GlucoseCalculator.getDinnerStatus(inputViewModel.glucose.dinner)} (${inputViewModel.glucose.dinner})")
 
         return report.toString()
+    }
+
+    // Function to check if all glucose entry values are equal excluding the date
+    private fun isEqual(glucose1: Glucose?, glucose2: Glucose?): Boolean {
+        Log.d(TAG, "glucose 1 fasting is ${glucose1?.fasting} - glucose 2 fasting is ${glucose2?.fasting}")
+        Log.d(TAG, "glucose 1 breakfast is ${glucose1?.breakfast} - glucose 2 breakfast is ${glucose2?.breakfast}")
+        Log.d(TAG, "glucose 1 lunch is ${glucose1?.lunch} - glucose 2 lunch is ${glucose2?.lunch}")
+        Log.d(TAG, "glucose 1 dinner is ${glucose1?.dinner} - glucose 2 dinner is ${glucose2?.dinner}")
+        return ((glucose1?.fasting == glucose2?.fasting) && (glucose1?.breakfast == glucose2?.breakfast) && (glucose1?.lunch == glucose2?.lunch) && (glucose1?.dinner == glucose2?.dinner))
+    }
+
+    private fun isIncomplete(glucose: Glucose): Boolean {
+        return (glucose.fasting == 0 && glucose.breakfast == 0 && glucose.lunch == 0 && glucose.dinner == 0)
     }
 }
