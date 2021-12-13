@@ -4,6 +4,7 @@ import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import android.view.*
+import android.widget.Button
 import androidx.fragment.app.Fragment
 import android.widget.CheckBox
 import android.widget.TextView
@@ -12,10 +13,15 @@ import androidx.fragment.app.FragmentResultListener
 import androidx.fragment.app.activityViewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.work.ExistingWorkPolicy
+import androidx.work.OneTimeWorkRequest
+import androidx.work.WorkManager
 import java.util.*
+import java.util.concurrent.TimeUnit
 
 private const val TAG = "HistoryFragment"
 private const val REQUEST_DATE = "DialogDate"
+private const val REMINDER_WORK = "ReminderWorker"
 
 class HistoryFragment : Fragment(R.layout.history_view), FragmentResultListener {
 
@@ -24,6 +30,7 @@ class HistoryFragment : Fragment(R.layout.history_view), FragmentResultListener 
     private lateinit var rViewManager: RecyclerView.LayoutManager
     private var rViewAdapter: GlucoseRViewAdapter? = GlucoseRViewAdapter(emptyList())
     private lateinit var dateDialog: DatePickerFragment
+    private lateinit var reminderButton: MenuItem
 
     /*
      * Interface for switching between fragments
@@ -143,11 +150,23 @@ class HistoryFragment : Fragment(R.layout.history_view), FragmentResultListener 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         super.onCreateOptionsMenu(menu, inflater)
         inflater.inflate(R.menu.fragment_glucose_list, menu)
+
+        reminderButton = menu.findItem(R.id.toggle_reminder_button)
+        val reminderText = when (Preferences.isReminderEnabled(requireContext())) {
+            false -> R.string.reminder_disabled
+            true -> R.string.reminder_enabled
+        }
+        reminderButton.setTitle(reminderText)
     }
 
     // When the user selects the 'Add Glucose Entry' button in the menu bar,
     // open a date chooser dialog to allow the user to set the date for the new entry.
     // The date dialog handler function will take action after a date is selected.
+
+    // When the user selects the 'Toggle Reminders' button in the menu bar,
+    // (for the purpose of this app) create a work request with a 60 second delay
+    // that will check for existing entries for this date in the database.
+    // If there is no entry for today, notify the user.
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             R.id.new_glucose_button -> {
@@ -161,7 +180,29 @@ class HistoryFragment : Fragment(R.layout.history_view), FragmentResultListener 
 
                 // No further processing necessary, mark done by returning true
                 true
-            } else -> return super.onOptionsItemSelected(item)
+            }
+            R.id.toggle_reminder_button -> {
+
+                // Toggle the reminders enabled flag and set button subtext
+                val reminderFlag = Preferences.isReminderEnabled(requireContext())
+                Preferences.setReminderEnabled(requireContext(), !reminderFlag)
+
+                if (Preferences.isReminderEnabled(requireContext())) {
+                    val workRequest = OneTimeWorkRequest
+                        .Builder(ReminderWorker::class.java)
+                        .setInitialDelay(60, TimeUnit.SECONDS)
+                        .build()
+                    WorkManager.getInstance(requireContext()).enqueueUniqueWork(REMINDER_WORK, ExistingWorkPolicy.REPLACE, workRequest)
+                    reminderButton.setTitle(R.string.reminder_enabled)
+                    Toast.makeText(context, "Reminders enabled!", Toast.LENGTH_SHORT).show()
+                } else {
+                    WorkManager.getInstance(requireContext()).cancelAllWork()
+                    reminderButton.setTitle(R.string.reminder_disabled)
+                    Toast.makeText(context, "Reminders disabled!", Toast.LENGTH_SHORT).show()
+                }
+                true
+            }
+            else -> return super.onOptionsItemSelected(item)
         }
     }
 

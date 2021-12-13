@@ -2,7 +2,13 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="edu.arizona.cast.austinramsay.glucosemonitor">
 
+    <permission
+        android:name="edu.arizona.cast.austinramsay.glucosemonitor.PRIVATE"
+        android:protectionLevel="signature" />
+
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission
+        android:name="edu.arizona.cast.austinramsay.glucosemonitor.PRIVATE" />
 
     <application
         android:name=".GlucoseApplication"
@@ -22,6 +28,14 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <receiver android:name=".NotificationReceiver"
+            android:permission="edu.arizona.cast.austinramsay.glucosemonitor.PRIVATE"
+            android:exported="false">
+            <intent-filter android:priority="-999">
+                <action
+                    android:name="edu.arizona.cast.austinramsay.glucosemonitor.SHOW_NOTIFICATION" />
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>

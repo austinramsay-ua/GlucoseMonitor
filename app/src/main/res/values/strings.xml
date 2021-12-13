@@ -17,4 +17,10 @@
     <string name="delete_glucose">Delete Glucose Entry</string>
     <string name="send_glucose">Send Glucose Entry</string>
     <string name="upload_glucose">Upload Entry to Database</string>
+    <string name="toggle_reminder">Start Reminder</string>
+    <string name="notification_channel_name">GlucoseReminder</string>
+    <string name="missing_entry_title">Missing Glucose Entry</string>
+    <string name="missing_entry_text">No glucose entry for today has been input. Tap to create an entry now!</string>
+    <string name="reminder_enabled">Disable Reminders</string>
+    <string name="reminder_disabled">Enable Reminders</string>
 </resources>

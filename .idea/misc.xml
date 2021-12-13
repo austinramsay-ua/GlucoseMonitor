@@ -11,7 +11,7 @@
         <entry key="app/src/main/res/layout/input_overview_fragment.xml" value="0.25" />
         <entry key="app/src/main/res/layout/list_item_glucose.xml" value="0.18541033434650456" />
         <entry key="app/src/main/res/menu/fragment_glucose_input.xml" value="0.35208333333333336" />
-        <entry key="app/src/main/res/menu/fragment_glucose_list.xml" value="0.35208333333333336" />
+        <entry key="app/src/main/res/menu/fragment_glucose_list.xml" value="0.335" />
       </map>
     </option>
   </component>
